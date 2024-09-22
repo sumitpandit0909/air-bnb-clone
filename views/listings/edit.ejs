@@ -1,0 +1,46 @@
+<% layout('/layouts/boilerplate') %>
+<body >
+    <div class="edit-body">
+
+        
+        <div class="form-container">
+            <h2>Edit Listing</h2>
+            <form action="/listings/search/<%= datas.id %>?_method=PUT" method="post">
+                
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" value="<%= datas.title%>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="desc">Description</label>
+                <textarea id="description" name="desc"  required><%= datas.desc %></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="<%= datas.location %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" id="country" name="country" value="<%= datas.country %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" id="price" name="price" value="<%= datas.price %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="image">Image URL</label>
+                <input type="text" id="image-url" name="image" value="<%= datas.image %>" required>
+            </div>
+            
+            <button type="submit">Update Listing</button>
+        </form>
+    </div>
+
+
+</div>
+</body>

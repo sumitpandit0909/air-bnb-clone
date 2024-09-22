@@ -1,0 +1,19 @@
+<% layout('/layouts/boilerplate') %>
+<body>
+    <main class="main">
+        <img src="<%= data.image %>" alt="">
+        <h2><%= data.title %></h2>
+        <p><%= data.desc %></p>
+        <p>Location : <%= data.location %></p>
+        <p>Country : <%= data.country %></p>
+        <p>Price :₹ <strong><%= data.price.toLocaleString("en-IN") %></strong></p>
+        <div class="action-btns">
+            <form method="get" action="/listings/search/<%= data._id %>/edit">
+                <button class="new-listing edit-btn"> edit</button>
+            </form>
+            <form method="post" action="/listings/search/<%= data._id %>/remove?_method=DELETE">
+                <button class="new-listing edit-btn"> Delete Listing</button>
+            </form>
+        </div>
+    </main>
+</body>

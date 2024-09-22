@@ -1,0 +1,46 @@
+<% layout('/layouts/boilerplate') %>
+
+    <body>
+        <div class="edit-body">
+
+            
+            <div class="form-container">
+                <h2>Create Listing</h2>
+                <form action="/listings/submit-listing" method="post">
+                    
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" placeholder="Enter the title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    <textarea id="description" name="desc" placeholder="Enter the description" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="Enter the location" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country" placeholder="Enter the country" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="number" id="price" name="price" placeholder="Enter the price" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image">Image URL</label>
+                    <input type="text" id="image-url" name="image" placeholder="Enter the image URL" required>
+                </div>
+                
+                <button type="submit">Submit Listing</button>
+            </form>
+        </div>
+        
+    </div>
+    </body>

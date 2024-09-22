@@ -1,0 +1,22 @@
+<% layout('/layouts/boilerplate') %>
+<body>
+
+    
+    <main class="index-main">
+        <% for(data of datas){ %>
+
+            <div class="card">
+                <a href="listings/search/<%= data._id %>">
+                    <img class="listimg" src="<%= data.image %>" alt="">
+                    <h3>
+                        <%= data.title %>
+                    </h3>
+                    <p>₹ <%= data.price %>/ night</p>
+                </a>
+
+            </div>
+
+            <% } %>
+    </main>
+
+</body>
