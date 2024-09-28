@@ -9,7 +9,10 @@ const User = require("./models/user.js")
 const app = express();
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
+// const {ListingSchema} =require('./validateschema.js')
+const {reviewsSchema} =require('./validateschema.js')
 
+const Review = require('./models/reviews.js')
 const port = 8080;
 
 // ------------middlewares------------- 
@@ -22,6 +25,15 @@ app.engine('ejs',ejsMate)
 app.listen(port,()=>{
     console.log(`Server running on port ${port}`);
 })
+
+const validateReview = (req,res,next)=>{
+    let {error}= reviewsSchema.validate(req.body);
+    if(error){
+        res.send(error.details[0].message)
+    }else{
+        next()
+    }
+}
 
 //---------------Authentication for add listing---------------
 
@@ -86,19 +98,38 @@ app.get("/listings/newlisting", (req,res)=>{
     
 })
 app.post("/listings/submit-listing",asyncWrap(async (req,res)=>{
+    // ListingSchema.validate(req.body)
     let data = req.body;
     let newlisting =  new Listing(data);
     await newlisting.save();
     res.redirect("/listings")
 }));
 // ------------------show route--------------------
-app.get("/listings/search/:id",asyncWrap(async (req,res)=>{
-    let id = req.params.id;
-    let data = await Listing.findById(id);
-    // console.log(data)
-    res.render("listings/show.ejs",{data})
 
+app.get("/listings/search/:id", asyncWrap(async (req, res) => {
+    let id = req.params.id;
+
+    // Fetch the listing document
+    let listing = await Listing.findById(id);
+
+    // Manually fetch reviews based on the review IDs in the listing
+    let reviews = [];
+    if (listing.reviews && listing.reviews.length > 0) {
+        reviews = await Review.find({ _id: { $in: listing.reviews } });
+    }
+
+    // Combine listing data with fetched reviews
+    let data = {
+        ...listing._doc,
+        reviews // Add the fetched reviews to the listing data
+    };
+
+    res.render("listings/show.ejs", { data });
 }));
+
+
+
+
 
 // -----------------------EDit and update route-------------------
 app.get("/listings/search/:id/edit",asyncWrap(async (req,res)=>{
@@ -117,9 +148,51 @@ app.put("/listings/search/:id",asyncWrap(async (req,res)=>{
 // -----------------------Delete route-------------------
 app.delete("/listings/search/:id/remove",asyncWrap(async (req,res)=>{
     let id = req.params.id;
-    await Listing.deleteOne({_id:id});
+    await Listing.findByIdAndDelete({_id:id});
     res.redirect("/listings")
 }));
+// -----------------------Review route-------------------
+app.post("/listings/search/:id/submit-review",validateReview, asyncWrap(async(req,res)=>{
+    reviewsSchema.validate(req.body)
+    let id = req.params.id;
+    let listing = await Listing.findById(id)
+    let data = req.body;
+    console.log(data)
+    let newreview = new Review(data);
+    listing.reviews.push(newreview);
+    await newreview.save();
+    await listing.save();
+    
+    // res.send({review})
+  
+    res.redirect(`/listings/search/${id}`)
+
+}));
+
+
+// reviewsSchema.post("deleteOne",(data)=>{
+//     console.log(data)
+// })
+// -----------------DELETE REVIEW------------------- 
+
+
+
+
+app.delete("/listings/search/:id/delete-review/:reviewid", asyncWrap(async (req,res)=>{
+    let id = req.params.id;
+    let reviewid = req.params.reviewid;
+   
+    await Listing.findByIdAndUpdate(id,{$pull:{reviews :reviewid}})
+    
+    await Review.findByIdAndDelete(reviewid);
+
+    // await Listing.findOne({_id :})
+    res.redirect(`/listings/search/${id}`)
+}));
+
+
+
+
 
 // -----------------------------signup route---------
 
@@ -147,6 +220,9 @@ app.post("/login/submit-login",async(req,res)=>{
     }else{
         res.send("login failed")
     }
+});
+app.get("*",(req,res,next)=>{
+    next(new ExpressError(404,"Page not found"))
 })
 
 // -------------------handling error--------------------
