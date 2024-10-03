@@ -2,6 +2,7 @@ const express = require("express");
 const router =express.Router({mergeParams:true});
 const Listing = require("../models/listing.js");
 const Review = require('../models/reviews.js');
+const {isLoggedIn} = require("../middleware.js")
 
 // ---------------handling async routes error--------------------
 function asyncWrap(fxn){
@@ -30,15 +31,17 @@ router.get("/",asyncWrap(async (req,res)=>{
 
 // ------------------post route---------------------
 
-router.get("/newlisting", (req,res)=>{
+router.get("/newlisting", isLoggedIn, (req,res)=>{
+   
     res.render("listings/newlisting.ejs");
     
 })
-router.post("/submit-listing",asyncWrap(async (req,res)=>{
+router.post("/submit-listing",isLoggedIn,asyncWrap(async (req,res)=>{
     // ListingSchema.validate(req.body)
     let data = req.body;
     let newlisting =  new Listing(data);
     await newlisting.save();
+    req.flash("success", "Listing added successfully")
     res.redirect("/listings")
 }));
 // ------------------show route--------------------
@@ -48,6 +51,10 @@ router.get("/search/:id", asyncWrap(async (req, res) => {
 
     // Fetch the listing document
     let listing = await Listing.findById(id);
+    if(!listing){
+        req.flash("error","Requested Listing does not exist")
+        res.redirect("/listings")
+    }
 
     // Manually fetch reviews based on the review IDs in the listing
     let reviews = [];
@@ -69,23 +76,34 @@ router.get("/search/:id", asyncWrap(async (req, res) => {
 
 
 // -----------------------EDit and update route-------------------
-router.get("/search/:id/edit",asyncWrap(async (req,res)=>{
+router.get("/search/:id/edit",isLoggedIn,asyncWrap(async (req,res)=>{
     let id = req.params.id;
     let data = await Listing.findById(id);
+    if(!data){
+        req.flash("error","Requested Listing does not exist")
+        res.redirect("/listings")
+    }
     res.render("listings/edit.ejs",{datas:data})
 
 }));
 
-router.put("/search/:id",asyncWrap(async (req,res)=>{
+router.put("/search/:id",isLoggedIn,asyncWrap(async (req,res)=>{
     let id = req.params.id;
     let data = req.body;
     await Listing.findByIdAndUpdate(id,data);
+    req.flash("success", "Listing updated successfully")
     res.redirect("/listings")
 }));
 // -----------------------Delete route-------------------
 router.delete("/search/:id/remove",asyncWrap(async (req,res)=>{
+    if (!req.isAuthenticated()) {
+        req.session.returnTo = `/listings/search/${req.params.id}`;
+        req.flash("error", "You need to login first");
+        return res.redirect("/login");
+    }
     let id = req.params.id;
     await Listing.findByIdAndDelete({_id:id});
+    req.flash("success", "Listing deleted successfully")
     res.redirect("/listings")
 }));
 

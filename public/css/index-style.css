@@ -75,3 +75,22 @@ img{
     margin: 10px;
     width: 30vw;
 }
+.success{
+    width: fit-content;
+    padding: 10px;
+    margin-top: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgb(194, 219, 155);
+    border: 1px solid rgb(156, 243, 156);
+}
+.error{
+    width: fit-content;
+    padding: 10px;
+    margin-top: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgb(219, 155, 155);
+    border: 1px solid rgb(252, 138, 138);
+}
+

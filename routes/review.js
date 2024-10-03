@@ -3,7 +3,7 @@ const router =express.Router({mergeParams:true});
 const Listing = require("../models/listing.js");
 const Review = require('../models/reviews.js');
 const {reviewsSchema} =require('../validateschema.js');
-
+const {isLoggedIn} = require("../middleware.js")
 
 const validateReview = (req,res,next)=>{
     let {error}= reviewsSchema.validate(req.body);
@@ -32,7 +32,7 @@ class ExpressError extends Error {
 }
 
 // -----------------------Review route-------------------
-router.post("/submit-review",validateReview, asyncWrap(async(req,res)=>{
+router.post("/submit-review",isLoggedIn,validateReview, asyncWrap(async(req,res)=>{
     reviewsSchema.validate(req.body)
     let id = req.params.id;
     let listing = await Listing.findById(id)
@@ -44,6 +44,7 @@ router.post("/submit-review",validateReview, asyncWrap(async(req,res)=>{
     await listing.save();
     
     // res.send({review})
+    req.flash("success", "Review added successfully")
   
     res.redirect(`/listings/search/${id}`)
 
@@ -54,7 +55,7 @@ router.post("/submit-review",validateReview, asyncWrap(async(req,res)=>{
 
 
 
-router.delete("/delete-review/:reviewid", asyncWrap(async (req,res)=>{
+router.delete("/delete-review/:reviewid",isLoggedIn, asyncWrap(async (req,res)=>{
     let id = req.params.id;
     let reviewid = req.params.reviewid;
    
@@ -63,6 +64,7 @@ router.delete("/delete-review/:reviewid", asyncWrap(async (req,res)=>{
     await Review.findByIdAndDelete(reviewid);
 
     // await Listing.findOne({_id :})
+    req.flash("success", "Review deleted successfully")
     res.redirect(`/listings/search/${id}`)
 }));
 
