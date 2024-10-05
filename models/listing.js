@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const Review = require("./reviews.js");
+const User = require("./user.js");
 
 // Define the Listing schema
 const ListingSchema = new Schema({
@@ -33,7 +34,11 @@ const ListingSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Review'
         }
-    ]
+    ],
+    owner :{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 });
 
 // Pre middleware to delete reviews before the listing is deleted

@@ -115,7 +115,9 @@ async function main(){
 // handling additional routes 
 
 app.get("*",(req,res,next)=>{
-    next(new ExpressError(404,"Page not found"))
+    req.flash("error","Page not found")
+    // next(new ExpressError(404,"Page not found"))
+    res.redirect("/listings")
 })
 
 // -------------------handling error--------------------

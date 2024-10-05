@@ -3,7 +3,9 @@ const router =express.Router({mergeParams:true});
 const Listing = require("../models/listing.js");
 const Review = require('../models/reviews.js');
 const {reviewsSchema} =require('../validateschema.js');
-const {isLoggedIn} = require("../middleware.js")
+const {isLoggedIn,isReviewAuthor} = require("../middleware.js")
+
+
 
 const validateReview = (req,res,next)=>{
     let {error}= reviewsSchema.validate(req.body);
@@ -32,13 +34,14 @@ class ExpressError extends Error {
 }
 
 // -----------------------Review route-------------------
-router.post("/submit-review",isLoggedIn,validateReview, asyncWrap(async(req,res)=>{
+router.post("/submit-review",isLoggedIn,validateReview,  asyncWrap(async(req,res)=>{
     reviewsSchema.validate(req.body)
     let id = req.params.id;
     let listing = await Listing.findById(id)
     let data = req.body;
     console.log(data)
     let newreview = new Review(data);
+    newreview.author = req.user._id;
     listing.reviews.push(newreview);
     await newreview.save();
     await listing.save();
@@ -55,8 +58,13 @@ router.post("/submit-review",isLoggedIn,validateReview, asyncWrap(async(req,res)
 
 
 
-router.delete("/delete-review/:reviewid",isLoggedIn, asyncWrap(async (req,res)=>{
+router.delete("/delete-review/:reviewid",isReviewAuthor, asyncWrap(async (req,res)=>{
     let id = req.params.id;
+    if (!req.isAuthenticated()) {
+        req.session.returnTo = `/listings/search/${req.params.id}`;
+        req.flash("error", "You need to login first");
+        return res.redirect("/login");
+    }
     let reviewid = req.params.reviewid;
    
     await Listing.findByIdAndUpdate(id,{$pull:{reviews :reviewid}})

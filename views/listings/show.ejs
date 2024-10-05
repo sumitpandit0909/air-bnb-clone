@@ -2,24 +2,27 @@
 <body>
     <main class="main">
         
-        <img src="<%= data.image %>" alt="">
-        <h2><%= data.title %></h2>
-        <p><%= data.desc %></p>
-        <p>Location : <%= data.location %></p>
-        <p>Country : <%= data.country %></p>
-        <p>Price :₹ <strong><%= data.price.toLocaleString("en-IN") %></strong></p>
+        <img src="<%= listing.image %>" alt="">
+        <h2><%= listing.title %></h2>
+        <p>Owned By : <%= listing.owner.username %></p>
+        <p><%= listing.desc %></p>
+        <p>Location : <%= listing.location %></p>
+        <p>Country : <%= listing.country %></p>
+        <p>Price :₹ <strong><%= listing.price.toLocaleString("en-IN") %></strong></p>
+        <% if(currentUser && listing.owner._id.equals(currentUser._id)){ %>
         <div class="action-btns">
-            <form method="get" action="/listings/search/<%= data._id %>/edit">
+            <form method="get" action="/listings/search/<%= listing._id %>/edit">
                 <button class="new-listing edit-btn"> edit</button>
             </form>
-            <form method="post" action="/listings/search/<%= data._id %>/remove?_method=DELETE">
+            <form method="post" action="/listings/search/<%= listing._id %>/remove?_method=DELETE">
                 <button class="new-listing edit-btn"> Delete Listing</button>
             </form>
         </div>
-
+       <% } %>
+       <% if(currentUser){ %>
         <div class="form-container">
             <h2>Add Reivew</h2>
-            <form action="/listings/search/<%= data._id %>/submit-review" method="post">
+            <form action="/listings/search/<%= listing._id %>/submit-review" method="post">
                 
             <div class="form-group">
                 <label for="rating">Rating</label>
@@ -34,21 +37,24 @@
             <button type="submit">Submit Review</button>
         </form>
     </div>
-
+    <% } %>
         <h4>Reviews</h4>
-        <% if (data.reviews && data.reviews.length > 0) { %>
+        <% if (listing.reviews && listing.reviews.length > 0) { %>
            
                 <!-- Loop through each review and display it -->
                
-                <% for(re of data.reviews){ %>
-                    <div class="rating">
-                    <p><strong>Rating:</strong> <%= re.rating %></p>
-                        <p><strong>Review:</strong> <%= re.comment %></p>
-                        <form method="post" action="/listings/search/<%= data._id %>/delete-review/<%= re._id %>?_method=DELETE">
-                            <button class="new-listing edit-btn"> Delete</button>
-                        </form>
-                    </div>
+               <% for(re of listing.reviews){ %>
+                <div class="rating">
+                    <p><strong>Review By :</strong> <%= re.author.username %></p>
+                <p><strong>Rating:</strong> <%= re.rating %></p>
+                    <p><strong>Review:</strong> <%= re.comment %></p>
+                    <% if(currentUser && re.author._id.equals(currentUser._id)){ %>
+                    <form method="post" action="/listings/search/<%= listing._id %>/delete-review/<%= re._id %>?_method=DELETE">
+                        <button class="new-listing edit-btn"> Delete</button>
+                    </form>
                     <% } %>
+                </div>
+                <% } %>
                 
         <% } else { %>
             <p>No reviews available for this listing.</p>
